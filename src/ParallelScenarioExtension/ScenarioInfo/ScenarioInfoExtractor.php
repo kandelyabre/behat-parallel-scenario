@@ -63,7 +63,7 @@ class ScenarioInfoExtractor
         switch (true) {
             case $scenario instanceof OutlineNode && $this->isParallelExamples($scenario):
                 foreach ($scenario->getExamples() as $exampleNode) {
-                    $scenarios[] = new ScenarioInfo($feature->getFile(), $exampleNode->getLine());
+                    $scenarioInfo[] = new ScenarioInfo($feature->getFile(), $exampleNode->getLine());
                 }
                 break;
             case $scenario instanceof OutlineNode:
