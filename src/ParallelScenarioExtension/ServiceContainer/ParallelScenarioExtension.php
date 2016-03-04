@@ -18,6 +18,7 @@ use Tonic\Behat\ParallelScenarioExtension\Feature\FeatureRunner;
 use Tonic\Behat\ParallelScenarioExtension\Listener\OutputPrinter;
 use Tonic\Behat\ParallelScenarioExtension\Listener\StopOnFailure;
 use Tonic\Behat\ParallelScenarioExtension\ScenarioInfo\ScenarioInfoExtractor;
+use Tonic\Behat\ParallelScenarioExtension\ScenarioProcess\ProcessTerminator;
 use Tonic\Behat\ParallelScenarioExtension\ScenarioProcess\ScenarioProcessFactory;
 use Tonic\Behat\ParallelScenarioExtension\ScenarioProcess\ScenarioProcessProfileBalance;
 use Tonic\ParallelProcessRunner\ParallelProcessRunner;
@@ -35,6 +36,7 @@ class ParallelScenarioExtension implements ExtensionInterface
     const SCENARIO_INFO_EXTRACTOR = 'parallel_scenario.scenario.info.extractor';
 
     const PROCESS_RUNNER = 'parallel_scenario.process.runner';
+    const PROCESS_TERMINATOR = 'parallel_scenario.process.terminator';
     const PROCESS_FACTORY = 'parallel_scenario.process.factory';
     const PROCESS_PROFILE_BALANCE = 'parallel_scenario.process.profile_balance';
     const OUTPUT_PRINTER = 'parallel_scenario.output.printer';
@@ -186,10 +188,21 @@ class ParallelScenarioExtension implements ExtensionInterface
     /**
      * @param ContainerBuilder $containerBuilder
      */
+    protected function loadProcessTerminator(ContainerBuilder $containerBuilder)
+    {
+        $definition = new Definition(ProcessTerminator::class);
+
+        $containerBuilder->setDefinition(self::PROCESS_TERMINATOR, $definition);
+    }
+
+    /**
+     * @param ContainerBuilder $containerBuilder
+     */
     protected function loadStopOnFailure(ContainerBuilder $containerBuilder)
     {
         $definition = new Definition(StopOnFailure::class, [
             new Reference(self::PROCESS_RUNNER),
+            new Reference(self::PROCESS_TERMINATOR),
         ]);
         $definition->addTag(EventDispatcherExtension::SUBSCRIBER_TAG);
 

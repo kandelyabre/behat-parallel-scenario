@@ -3,6 +3,7 @@
 namespace Tonic\Behat\ParallelScenarioExtension\Listener;
 
 use Tonic\Behat\ParallelScenarioExtension\Event\ParallelScenarioEventType;
+use Tonic\Behat\ParallelScenarioExtension\ScenarioProcess\ProcessTerminator;
 use Tonic\Behat\ParallelScenarioExtension\ScenarioProcess\ScenarioProcess;
 use Tonic\ParallelProcessRunner\Event\ProcessEvent;
 use Tonic\ParallelProcessRunner\ParallelProcessRunner;
@@ -32,13 +33,15 @@ class StopOnFailureTest extends \PHPUnit_Framework_TestCase
         $parallelProcessRunner = $this->getMock(ParallelProcessRunner::class, ['stop']);
         $parallelProcessRunner->expects($this->once())->method('stop');
 
+        $processTerminator = $this->getMock(ProcessTerminator::class, ['terminate']);
+        $processTerminator->expects($this->once())->method('terminate')->with(1);
+
         $process = $this->getMock(ScenarioProcess::class, ['withError'], [], '', false);
         $process->expects($this->once())->method('withError')->willReturn(true);
 
         $event = $this->getMock(ProcessEvent::class, null, [$process]);
 
-        $listener = $this->getMock(StopOnFailure::class, ['terminate'], [$parallelProcessRunner]);
-        $listener->expects($this->once())->method('terminate')->with(1);
+        $listener = new StopOnFailure($parallelProcessRunner, $processTerminator);
 
         /** @var StopOnFailure $listener */
         /** @var ProcessEvent $event */
@@ -53,13 +56,15 @@ class StopOnFailureTest extends \PHPUnit_Framework_TestCase
         $parallelProcessRunner = $this->getMock(ParallelProcessRunner::class, ['stop']);
         $parallelProcessRunner->expects($this->never())->method('stop');
 
+        $processTerminator = $this->getMock(ProcessTerminator::class, ['terminate']);
+        $processTerminator->expects($this->never())->method('terminate');
+
         $process = $this->getMock(ScenarioProcess::class, ['withError'], [], '', false);
         $process->expects($this->once())->method('withError')->willReturn(false);
 
         $event = $this->getMock(ProcessEvent::class, null, [$process]);
 
-        $listener = $this->getMock(StopOnFailure::class, ['terminate'], [$parallelProcessRunner]);
-        $listener->expects($this->never())->method('terminate');
+        $listener = new StopOnFailure($parallelProcessRunner, $processTerminator);
 
         /** @var StopOnFailure $listener */
         /** @var ProcessEvent $event */
