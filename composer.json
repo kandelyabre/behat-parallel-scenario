@@ -14,6 +14,7 @@
     },
 
     "require": {
+        "php": ">=5.5",
         "behat/behat" : "3.*",
         "tonicforhealth/parallel-process-runner" : "1.*"
     },

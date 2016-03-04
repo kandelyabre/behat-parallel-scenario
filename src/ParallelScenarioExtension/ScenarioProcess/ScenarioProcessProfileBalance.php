@@ -43,7 +43,7 @@ class ScenarioProcessProfileBalance implements EventSubscriberInterface
      */
     public function increment(ProcessEvent $event)
     {
-        if ($this->balance) {
+        if ($this->hasProfiles()) {
             $profile = $this->getProfileNameWithMinimumBalance();
             $this->balance[$profile]++;
             /** @var ScenarioProcess $process */
@@ -57,7 +57,7 @@ class ScenarioProcessProfileBalance implements EventSubscriberInterface
      */
     public function decrement(ProcessEvent $event)
     {
-        if ($this->balance) {
+        if ($this->hasProfiles()) {
             /** @var ScenarioProcess $process */
             $process = $event->getProcess();
             /** @var ProcessOptionScalar $profileOption */
@@ -72,5 +72,13 @@ class ScenarioProcessProfileBalance implements EventSubscriberInterface
     protected function getProfileNameWithMinimumBalance()
     {
         return array_keys($this->balance, min($this->balance))[0];
+    }
+
+    /**
+     * @return bool
+     */
+    protected function hasProfiles()
+    {
+        return count($this->balance) > 0;
     }
 }
