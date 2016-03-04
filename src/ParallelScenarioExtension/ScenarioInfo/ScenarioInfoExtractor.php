@@ -27,18 +27,8 @@ class ScenarioInfoExtractor
         $allScenarios = [];
 
         foreach ($feature->getScenarios() as $scenario) {
-            $scenarios = [];
 
-            switch (true) {
-                case $scenario instanceof OutlineNode && $this->isParallelExamples($scenario):
-                    foreach ($scenario->getExamples() as $exampleNode) {
-                        $scenarios[] = new ScenarioInfo($feature->getFile(), $exampleNode->getLine());
-                    }
-                    break;
-                case $scenario instanceof OutlineNode:
-                case $scenario instanceof ScenarioInterface:
-                    $scenarios[] = new ScenarioInfo($feature->getFile(), $scenario->getLine());
-            }
+            $scenarioInfoArray = $this->getSenarioInfoArray($feature, $scenario);
 
             if ($this->isParallelWait($scenario) || !$this->isParallel($scenario)) {
                 $allScenarios[] = [];
@@ -50,7 +40,7 @@ class ScenarioInfoExtractor
                 $allScenarios[$lastIndex] = [];
             }
 
-            $allScenarios[$lastIndex] = array_merge($allScenarios[$lastIndex], $scenarios);
+            $allScenarios[$lastIndex] = array_merge($allScenarios[$lastIndex], $scenarioInfoArray);
 
             if (!$this->isParallel($scenario)) {
                 $allScenarios[] = [];
@@ -58,6 +48,30 @@ class ScenarioInfoExtractor
         }
 
         return array_values(array_filter($allScenarios));
+    }
+
+    /**
+     * @param FeatureNode       $feature
+     * @param ScenarioInterface $scenario
+     *
+     * @return ScenarioInfo[]
+     */
+    protected function getSenarioInfoArray(FeatureNode $feature, ScenarioInterface $scenario)
+    {
+        $scenarioInfo = [];
+
+        switch (true) {
+            case $scenario instanceof OutlineNode && $this->isParallelExamples($scenario):
+                foreach ($scenario->getExamples() as $exampleNode) {
+                    $scenarios[] = new ScenarioInfo($feature->getFile(), $exampleNode->getLine());
+                }
+                break;
+            case $scenario instanceof OutlineNode:
+            case $scenario instanceof ScenarioInterface:
+                $scenarioInfo[] = new ScenarioInfo($feature->getFile(), $scenario->getLine());
+        }
+
+        return $scenarioInfo;
     }
 
     /**
